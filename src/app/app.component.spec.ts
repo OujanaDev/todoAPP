@@ -1,29 +1,63 @@
-import { TestBed } from '@angular/core/testing';
-import { AppComponent } from './app.component';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { NgClass, NgFor } from '@angular/common';
 
-describe('AppComponent', () => {
-  beforeEach(async () => {
-    await TestBed.configureTestingModule({
-      imports: [AppComponent],
-    }).compileComponents();
-  });
+export interface TodoItem {
+  id: number;
+  task: string;
+  completed: boolean;
+}
 
-  it('should create the app', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app).toBeTruthy();
-  });
 
-  it(`should have the 'todoApp' title`, () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    const app = fixture.componentInstance;
-    expect(app.title).toEqual('todoApp');
-  });
+@Component({
+    selector: 'app-root',
+    standalone: true,
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.css',
+    imports: [RouterOutlet,NgFor,NgClass]
+})
+export class AppComponent {
 
-  it('should render title', () => {
-    const fixture = TestBed.createComponent(AppComponent);
-    fixture.detectChanges();
-    const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, todoApp');
-  });
-});
+  todoList: TodoItem[] = [];
+    newTask: string = '';
+    @ViewChild('todoText') todoInputRef: ElementRef<HTMLInputElement> = null!;
+
+    ngOnInit(): void {
+      const storedTodoList = this.todoList;
+    //   if (storedTodoList) {
+    //       this.todoList = JSON.parse(storedTodoList);
+    //   }
+  }
+  addTask(text: string): void {
+    if (text.trim() !== '') {
+        const newTodoItem: TodoItem = {
+            id: Date.now(),
+            task: text.trim(),
+            completed: false
+        };
+        this.todoList.push(newTodoItem);
+        this.todoInputRef.nativeElement.value = '';
+        this.saveTodoList();
+    }
+}
+
+deleteTask(id: number): void {
+    this.todoList = this.todoList.filter(item => item.id !== id);
+    this.saveTodoList();
+}
+
+toggleCompleted(id: number): void {
+    const todoItem = this.todoList.find(item => item.id === id);
+    if (todoItem) {
+        todoItem.completed = !todoItem.completed;
+        this.saveTodoList();
+    }
+}
+
+saveTodoList(): void {
+    // localStorage.setItem('todoList', JSON.stringify(this.todoList));
+
+}
+
+
+}
